@@ -771,11 +771,11 @@ function ProductsPage() {
         <div className="container">
           <div className="trust-bar__inner">
             {[
-              "West Point graduate",
-              "Marshall Scholar",
-              "Combat veteran, Army Ranger",
-              "Founder of multiple venture-backed startups",
-              "Keynote speaker",
+              "Veteran-led & SDVOSB-certified",
+              "Built for small business owners",
+              "Practical AI — implemented, not just advised",
+              "Plain-English guidance, no jargon",
+              "From first workflow to fully built systems",
             ].map((item, i, arr) => (
               <span key={item} className="trust-bar__group">
                 <span className="trust-bar__item">{item}</span>
