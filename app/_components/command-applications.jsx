@@ -72,6 +72,11 @@ const Icons = {
   mail: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>,
   phone: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>,
   star: <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>,
+  bolt: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M13 2L4.09 12.7a1 1 0 00.77 1.64H11l-1 7.66 8.91-10.7a1 1 0 00-.77-1.64H12l1-7.66z"/></svg>,
+  cap: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"/><path d="M22 10v6"/></svg>,
+  clipboard: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><path d="M9 13l2 2 4-4"/></svg>,
+  cycle: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>,
+  globe: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>,
 };
 
 // ── Navbar ──
@@ -86,6 +91,7 @@ function Navbar() {
   const links = [
     { to: "/", label: "Home" },
     { to: "/services", label: "Services" },
+    { to: "/products", label: "Products" },
     { to: "/about", label: "About" },
     { to: "/work", label: "Work" },
     { to: "/contact", label: "Contact" },
@@ -571,6 +577,293 @@ function ServicesPage() {
 }
 
 /* ═══════════════════════════════════════════
+   PAGE: PRODUCTS (productized offerings)
+   ═══════════════════════════════════════════ */
+// NOTE: Each product CTA below uses a placeholder href="#".
+// TODO: wire each `cta.href` to its real destination — Stripe Checkout
+// for the course/one-time products, Calendly/booking link for the audit
+// and retainer, and the contact form (#/contact) for done-for-you intake.
+const PRODUCT_TIERS = [
+  {
+    tier: "Education",
+    cols: "pcards--2",
+    products: [
+      {
+        id: "jump-start",
+        icon: Icons.bolt,
+        badge: "Education",
+        name: "AI Jump Start",
+        price: "$297",
+        cadence: "one-time",
+        tagline: "Get your team using AI tools in a day — without the overwhelm.",
+        desc: "An on-demand video course (approx. 90 minutes) with a companion prompt library. Work through it at your own pace, implement the same day.",
+        features: [
+          "On-demand video training (~90 min)",
+          "10 industry-specific use cases",
+          "Prompt library PDF — yours to keep",
+          "30-day email Q&A access",
+        ],
+        cta: "Get instant access",
+        href: "#", // TODO: wire to Stripe Checkout (AI Jump Start)
+      },
+      {
+        id: "operator-course",
+        icon: Icons.cap,
+        badge: "Education",
+        name: "AI Operator Course",
+        price: "$997",
+        cadence: "one-time",
+        tagline: "Build AI workflows into every part of your business — no coding required.",
+        desc: "A self-paced 6-module course covering every core business function. Comes with done-for-you prompt templates and community access.",
+        features: [
+          "6 modules: operations, marketing, sales, finance, HR, customer service",
+          "Pre-built prompt templates for each module",
+          "Private community access (12 months)",
+          "Live monthly Q&A calls",
+        ],
+        cta: "Enroll now",
+        href: "#", // TODO: wire to Stripe Checkout (AI Operator Course)
+      },
+    ],
+  },
+  {
+    tier: "Advisory",
+    cols: "pcards--2",
+    products: [
+      {
+        id: "opportunity-audit",
+        icon: Icons.clipboard,
+        badge: "Advisory",
+        featured: true,
+        featuredBadge: "Most popular",
+        name: "AI Opportunity Audit",
+        price: "$1,500",
+        cadence: "one-time",
+        tagline: "Find out exactly where AI can save you time and make you money — specific to your business.",
+        desc: "A structured intake process, one 60-minute discovery call, and a custom 15–20 page report mapping your highest-value AI opportunities. You walk away with a prioritized roadmap, not generic advice.",
+        features: [
+          "Pre-work intake questionnaire",
+          "60-min recorded discovery call",
+          "15–20 page custom AI opportunity report",
+          "Prioritized roadmap: quick wins + long-term plays",
+          "1 follow-up call to walk through findings",
+        ],
+        cta: "Book your audit",
+        href: "#", // TODO: wire to Calendly/booking link (AI Opportunity Audit)
+      },
+      {
+        id: "advisory-retainer",
+        icon: Icons.cycle,
+        badge: "Advisory",
+        name: "AI Advisory Retainer",
+        price: "$1,200",
+        cadence: "/ month",
+        tagline: "Ongoing strategic guidance as you implement — so you don't waste money on the wrong tools.",
+        desc: "Two calls per month plus async support. We review your tool stack, hold you accountable to your roadmap, and help you make smart decisions as AI keeps evolving.",
+        features: [
+          "2 × 45-min calls per month",
+          "Async Slack or email support",
+          "Tool stack reviews and vendor vetting",
+          "Monthly implementation progress report",
+        ],
+        cta: "Apply for a retainer",
+        href: "#", // TODO: wire to application form / Calendly (Advisory Retainer)
+      },
+    ],
+  },
+  {
+    tier: "Done for you",
+    cols: "pcards--1",
+    products: [
+      {
+        id: "ai-built-website",
+        icon: Icons.globe,
+        badge: "Done for you",
+        name: "AI-Built Website",
+        price: "$1,500",
+        cadence: "one-time",
+        tagline: "A professional, modern website — designed, written, and built using AI. Delivered in 7 business days.",
+        desc: "We use AI tooling to design, write, and build your website at a fraction of what a traditional agency charges. You review and approve the copy before anything goes live.",
+        features: [
+          "5 pages: home, about, services, contact, blog",
+          "AI-generated copy (client-reviewed and approved)",
+          "Mobile-responsive, SEO-ready build",
+          "Hosting setup and domain configuration",
+          "30-day bug-fix guarantee",
+        ],
+        cta: "Start your project",
+        href: "#", // TODO: wire to project intake form (#/contact)
+      },
+    ],
+  },
+];
+
+function ProductCard({ p, delay }) {
+  return (
+    <Reveal delay={delay} className="pcard-wrap">
+      <article className={`pcard ${p.featured ? "pcard--featured" : ""}`}>
+        {p.featured && p.featuredBadge && (
+          <span className="pcard__featured-badge">{Icons.star} {p.featuredBadge}</span>
+        )}
+        <div className="pcard__top">
+          <div className="pcard__icon" aria-hidden="true">{p.icon}</div>
+          <span className="pcard__badge">{p.badge}</span>
+        </div>
+        <h3 className="pcard__name">{p.name}</h3>
+        <div className="pcard__price">
+          <span className="pcard__price-amt">{p.price}</span>
+          <span className="pcard__price-cadence">{p.cadence}</span>
+        </div>
+        <p className="pcard__tagline">{p.tagline}</p>
+        <p className="pcard__desc">{p.desc}</p>
+        <div className="pcard__divider" />
+        <ul className="pcard__features">
+          {p.features.map((f, i) => (
+            <li key={i}>{Icons.check} <span>{f}</span></li>
+          ))}
+        </ul>
+        {/* TODO: replace href="#" with the real link for this product */}
+        <a href={p.href} className={`btn ${p.featured ? "btn--warm" : "btn--accent"} btn--full pcard__cta`}>
+          {p.cta} {Icons.arrow}
+        </a>
+      </article>
+    </Reveal>
+  );
+}
+
+function ProductsPage() {
+  const scrollToProducts = (e) => {
+    e.preventDefault();
+    if (typeof document === "undefined") return;
+    document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  return (
+    <main>
+      {/* ── Hero ── */}
+      <section className="products-hero">
+        <div className="hero__bg-grid" />
+        <div className="container products-hero__inner">
+          <Reveal>
+            <h1>
+              AI isn't the future.{" "}
+              <span className="products-hero__accent">It's already the advantage your competitors are using.</span>
+            </h1>
+          </Reveal>
+          <Reveal delay={100}>
+            <p className="products-hero__sub">
+              We help small business owners cut through the noise — and start using AI to save
+              time, grow revenue, and stop doing work that software should be doing.
+            </p>
+          </Reveal>
+          <Reveal delay={180}>
+            <div className="hero__btns">
+              <a href="#products" className="btn btn--accent btn--lg" onClick={scrollToProducts}>
+                See our services {Icons.arrow}
+              </a>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── Credibility / Trust bar ── */}
+      <div className="trust-bar">
+        <div className="container">
+          <div className="trust-bar__inner">
+            {[
+              "West Point graduate",
+              "Marshall Scholar",
+              "Combat veteran, Army Ranger",
+              "Founder of multiple venture-backed startups",
+              "Keynote speaker",
+            ].map((item, i, arr) => (
+              <span key={item} className="trust-bar__group">
+                <span className="trust-bar__item">{item}</span>
+                {i < arr.length - 1 && <span className="trust-bar__dot" aria-hidden="true" />}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Products ── */}
+      <section className="section" id="products">
+        <div className="container">
+          <Reveal>
+            <div className="section__header">
+              <span className="kicker">What we offer</span>
+              <h2>Three ways to work with us — from self-guided learning to fully done-for-you delivery.</h2>
+            </div>
+          </Reveal>
+
+          {PRODUCT_TIERS.map((t) => (
+            <div className="tier" key={t.tier}>
+              <Reveal>
+                <span className="tier__label">{t.tier}</span>
+              </Reveal>
+              <div className={`pcards ${t.cols}`}>
+                {t.products.map((p, i) => (
+                  <ProductCard key={p.id} p={p} delay={i * 90} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── How it works ── */}
+      <section className="section section--alt">
+        <div className="container">
+          <Reveal>
+            <div className="section__header">
+              <span className="kicker">How it works</span>
+              <h2>From first conversation to AI working in your business</h2>
+            </div>
+          </Reveal>
+          <div className="steps">
+            {[
+              { num: "01", title: "Start with a course or audit", desc: "Get clarity on what AI can do for your business." },
+              { num: "02", title: "Build a roadmap", desc: "Leave with a prioritized plan tailored to your situation." },
+              { num: "03", title: "Execute with support", desc: "Implement on your own or let us build it for you." },
+            ].map((s, i) => (
+              <Reveal key={s.num} delay={i * 100}>
+                <div className="step">
+                  <span className="step__num">{s.num}</span>
+                  <h3>{s.title}</h3>
+                  <p>{s.desc}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Bottom CTA ── */}
+      <section className="cta-section">
+        <div className="container">
+          <Reveal>
+            <div className="cta-section__inner">
+              <h2>Not sure where to start?</h2>
+              <p>
+                The AI Opportunity Audit is the fastest way to get a clear picture of what's
+                possible for your specific business. Most clients see ROI within 30 days of
+                implementation.
+              </p>
+              <div className="cta-section__btns">
+                {/* TODO: wire to Calendly/booking link (AI Opportunity Audit) */}
+                <a href="#" className="btn btn--warm btn--lg">Book your audit — $1,500 {Icons.arrow}</a>
+              </div>
+              {/* TODO: wire to the free email course signup */}
+              <a href="#" className="cta-section__secondary">Or start with the free email course →</a>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+/* ═══════════════════════════════════════════
    PAGE: ABOUT
    ═══════════════════════════════════════════ */
 function AboutPage() {
@@ -946,6 +1239,8 @@ input,textarea,select,button{font-family:inherit;font-size:inherit}
 .btn--accent:hover{background:var(--accent-hover);box-shadow:0 0 24px var(--accent-glow)}
 .btn--outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
 .btn--outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn--warm{background:var(--warm);color:#1A1205}
+.btn--warm:hover{background:#FBBF24;box-shadow:0 0 24px rgba(245,158,11,0.25)}
 .btn--lg{padding:14px 28px;font-size:16px}
 .btn--sm{padding:8px 18px;font-size:13px}
 .btn--full{width:100%;justify-content:center}
@@ -1120,6 +1415,68 @@ input,textarea,select,button{font-family:inherit;font-size:inherit}
 .contact-form-success h3{margin-bottom:12px}
 .contact-form-success p{color:var(--text-muted)}
 
+/* ── Products Page ── */
+.products-hero{position:relative;overflow:hidden;padding:150px 0 72px;border-bottom:1px solid var(--border)}
+.products-hero__inner{position:relative;z-index:1;max-width:880px}
+.products-hero h1{font-size:clamp(2.1rem,5vw,3.5rem);margin-bottom:22px;line-height:1.1}
+.products-hero__accent{color:var(--accent)}
+.products-hero__sub{font-size:clamp(1.05rem,2vw,1.25rem);color:var(--text-muted);max-width:700px;margin-bottom:34px;line-height:1.7}
+
+/* ── Trust / Credibility bar ── */
+.trust-bar{background:var(--bg-alt);border-bottom:1px solid var(--border)}
+.trust-bar__inner{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 16px;padding:18px 24px}
+.trust-bar__group{display:inline-flex;align-items:center;gap:12px 16px}
+.trust-bar__item{font-size:0.8rem;letter-spacing:0.03em;color:var(--text-muted)}
+.trust-bar__dot{width:4px;height:4px;border-radius:50%;background:var(--text-muted);opacity:0.45;flex-shrink:0}
+@media(max-width:600px){
+  .trust-bar__inner{flex-direction:column;gap:8px}
+  .trust-bar__dot{display:none}
+}
+
+/* ── Tier groups ── */
+.tier{margin-bottom:56px}
+.tier:last-child{margin-bottom:0}
+.tier__label{display:flex;align-items:center;gap:16px;font-family:var(--font-mono);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:24px}
+.tier__label::after{content:"";flex:1;height:1px;background:var(--border)}
+
+/* ── Product cards ── */
+.pcards{display:grid;gap:24px;align-items:stretch}
+.pcards--2{grid-template-columns:repeat(2,1fr)}
+.pcards--1{grid-template-columns:minmax(0,560px)}
+.pcard-wrap{height:100%}
+.pcard-wrap .reveal-up,.pcards .reveal-up{height:100%}
+@media(max-width:860px){.pcards--2{grid-template-columns:1fr}}
+
+.pcard{display:flex;flex-direction:column;height:100%;padding:32px;border-radius:var(--radius-lg);background:var(--surface);border:1px solid var(--border);transition:transform 0.25s,border-color 0.25s,box-shadow 0.25s}
+.pcard:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 0 32px var(--accent-glow)}
+.pcard__top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.pcard__icon{width:52px;height:52px;border-radius:12px;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.pcard__badge{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:5px 10px;border-radius:999px}
+.pcard__name{font-size:1.3rem;color:var(--text);margin-bottom:10px}
+.pcard__price{display:flex;align-items:baseline;gap:8px;margin-bottom:16px}
+.pcard__price-amt{font-family:var(--font-display);font-size:2.2rem;font-weight:800;letter-spacing:-0.02em;color:var(--text);line-height:1}
+.pcard__price-cadence{font-size:0.9rem;color:var(--text-muted)}
+.pcard__tagline{color:var(--text);font-weight:500;line-height:1.55;margin-bottom:16px;font-size:0.98rem}
+.pcard__desc{color:var(--text-muted);line-height:1.65;font-size:0.92rem;margin-bottom:20px}
+.pcard__divider{height:1px;background:var(--border);margin-bottom:20px}
+.pcard__features{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+.pcard__features li{display:flex;align-items:flex-start;gap:10px;color:var(--text-muted);font-size:0.92rem;line-height:1.5}
+.pcard__features li svg{color:var(--accent-2);flex-shrink:0;margin-top:2px}
+.pcard__cta{margin-top:auto}
+
+/* ── Featured (Audit) card ── */
+.pcard--featured{position:relative;border-color:var(--warm);background:linear-gradient(180deg,rgba(245,158,11,0.07),var(--surface) 28%);box-shadow:0 0 0 1px var(--warm),0 20px 60px rgba(0,0,0,0.45)}
+.pcard--featured:hover{transform:translateY(-3px);border-color:var(--warm);box-shadow:0 0 0 1px var(--warm),0 26px 70px rgba(0,0,0,0.55)}
+.pcard--featured .pcard__icon{background:rgba(245,158,11,0.14);color:var(--warm)}
+.pcard--featured .pcard__badge{color:var(--warm);border-color:rgba(245,158,11,0.4)}
+.pcard__featured-badge{position:absolute;top:-13px;left:32px;display:inline-flex;align-items:center;gap:6px;background:var(--warm);color:#1A1205;font-family:var(--font-display);font-weight:700;font-size:12px;letter-spacing:0.03em;padding:6px 14px;border-radius:999px;box-shadow:0 4px 16px rgba(245,158,11,0.35)}
+.pcard__featured-badge svg{width:13px;height:13px}
+@media(min-width:861px){.pcard--featured{transform:translateY(-8px)}.pcard--featured:hover{transform:translateY(-11px)}}
+
+/* ── Bottom CTA secondary link ── */
+.cta-section__secondary{display:inline-block;margin-top:20px;font-size:0.95rem;color:var(--text-muted);border-bottom:1px solid transparent;transition:color 0.2s,border-color 0.2s}
+.cta-section__secondary:hover{color:var(--accent);border-color:var(--accent)}
+
 /* ── Footer ── */
 .footer{padding:72px 0 36px;border-top:1px solid var(--border);background:var(--bg-alt)}
 .footer__grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
@@ -1142,6 +1499,7 @@ export default function App({ initialPath }) {
   let Page;
   switch (route) {
     case "/services": Page = ServicesPage; break;
+    case "/products": Page = ProductsPage; break;
     case "/about": Page = AboutPage; break;
     case "/work": Page = WorkPage; break;
     case "/contact": Page = ContactPage; break;
