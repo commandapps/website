@@ -579,10 +579,10 @@ function ServicesPage() {
 /* ═══════════════════════════════════════════
    PAGE: PRODUCTS (productized offerings)
    ═══════════════════════════════════════════ */
-// NOTE: Each product CTA below uses a placeholder href="#".
-// TODO: wire each `cta.href` to its real destination — Stripe Checkout
-// for the course/one-time products, Calendly/booking link for the audit
-// and retainer, and the contact form (#/contact) for done-for-you intake.
+// Product CTAs POST the product `id` to /api/checkout, which creates a Stripe
+// Checkout Session (server-side, using STRIPE_SECRET_KEY) and returns a hosted
+// URL we redirect to. Pricing lives server-side in app/api/checkout/route.js —
+// keep the `id`s here in sync with the CATALOG keys there.
 const PRODUCT_TIERS = [
   {
     tier: "Education",
@@ -604,7 +604,6 @@ const PRODUCT_TIERS = [
           "30-day email Q&A access",
         ],
         cta: "Get instant access",
-        href: "#", // TODO: wire to Stripe Checkout (AI Jump Start)
       },
       {
         id: "operator-course",
@@ -622,7 +621,6 @@ const PRODUCT_TIERS = [
           "Live monthly Q&A calls",
         ],
         cta: "Enroll now",
-        href: "#", // TODO: wire to Stripe Checkout (AI Operator Course)
       },
     ],
   },
@@ -649,7 +647,6 @@ const PRODUCT_TIERS = [
           "1 follow-up call to walk through findings",
         ],
         cta: "Book your audit",
-        href: "#", // TODO: wire to Calendly/booking link (AI Opportunity Audit)
       },
       {
         id: "advisory-retainer",
@@ -667,7 +664,6 @@ const PRODUCT_TIERS = [
           "Monthly implementation progress report",
         ],
         cta: "Apply for a retainer",
-        href: "#", // TODO: wire to application form / Calendly (Advisory Retainer)
       },
     ],
   },
@@ -692,13 +688,39 @@ const PRODUCT_TIERS = [
           "30-day bug-fix guarantee",
         ],
         cta: "Start your project",
-        href: "#", // TODO: wire to project intake form (#/contact)
       },
     ],
   },
 ];
 
+// Starts a Stripe Checkout Session for a product and redirects to the hosted
+// page. On any failure it falls back to the contact page so a CTA never dead-ends.
+async function startStripeCheckout(productId) {
+  try {
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId }),
+    });
+    const data = await res.json();
+    if (data?.url) {
+      window.location.href = data.url;
+      return;
+    }
+  } catch {
+    // fall through to fallback
+  }
+  window.location.href = "/contact";
+}
+
 function ProductCard({ p, delay }) {
+  const [loading, setLoading] = useState(false);
+  const onBuy = async () => {
+    if (loading) return;
+    setLoading(true);
+    await startStripeCheckout(p.id);
+    setLoading(false);
+  };
   return (
     <Reveal delay={delay} className="pcard-wrap">
       <article className={`pcard ${p.featured ? "pcard--featured" : ""}`}>
@@ -722,20 +744,33 @@ function ProductCard({ p, delay }) {
             <li key={i}>{Icons.check} <span>{f}</span></li>
           ))}
         </ul>
-        {/* TODO: replace href="#" with the real link for this product */}
-        <a href={p.href} className={`btn ${p.featured ? "btn--warm" : "btn--accent"} btn--full pcard__cta`}>
-          {p.cta} {Icons.arrow}
-        </a>
+        <button
+          type="button"
+          onClick={onBuy}
+          disabled={loading}
+          aria-busy={loading}
+          className={`btn ${p.featured ? "btn--warm" : "btn--accent"} btn--full pcard__cta`}
+          style={loading ? { opacity: 0.8, cursor: "not-allowed" } : undefined}
+        >
+          {loading ? "Starting checkout…" : <>{p.cta} {Icons.arrow}</>}
+        </button>
       </article>
     </Reveal>
   );
 }
 
 function ProductsPage() {
+  const [auditLoading, setAuditLoading] = useState(false);
   const scrollToProducts = (e) => {
     e.preventDefault();
     if (typeof document === "undefined") return;
     document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+  };
+  const onBookAudit = async () => {
+    if (auditLoading) return;
+    setAuditLoading(true);
+    await startStripeCheckout("opportunity-audit");
+    setAuditLoading(false);
   };
 
   return (
@@ -850,10 +885,18 @@ function ProductsPage() {
                 implementation.
               </p>
               <div className="cta-section__btns">
-                {/* TODO: wire to Calendly/booking link (AI Opportunity Audit) */}
-                <a href="#" className="btn btn--warm btn--lg">Book your audit — $1,500 {Icons.arrow}</a>
+                <button
+                  type="button"
+                  onClick={onBookAudit}
+                  disabled={auditLoading}
+                  aria-busy={auditLoading}
+                  className="btn btn--warm btn--lg"
+                  style={auditLoading ? { opacity: 0.8, cursor: "not-allowed" } : undefined}
+                >
+                  {auditLoading ? "Starting checkout…" : <>Book your audit — $1,500 {Icons.arrow}</>}
+                </button>
               </div>
-              {/* TODO: wire to the free email course signup */}
+              {/* TODO: wire to the free email course signup (e.g. newsletter/ESP link) */}
               <a href="#" className="cta-section__secondary">Or start with the free email course →</a>
             </div>
           </Reveal>
