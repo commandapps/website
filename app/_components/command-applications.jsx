@@ -707,14 +707,19 @@ function CheckoutModal({ productId, onClose }) {
   const [failed, setFailed] = useState(false);
 
   const fetchClientSecret = useCallback(async () => {
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId }),
-    });
-    const data = await res.json();
-    if (!data?.clientSecret) throw new Error("no_client_secret");
-    return data.clientSecret;
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId }),
+      });
+      const data = await res.json();
+      if (!data?.clientSecret) throw new Error("no_client_secret");
+      return data.clientSecret;
+    } catch {
+      setFailed(true);
+      throw new Error("no_client_secret");
+    }
   }, [productId]);
 
   // Lock body scroll while open + close on Escape.
@@ -743,12 +748,12 @@ function CheckoutModal({ productId, onClose }) {
               <Link to="/contact" className="btn btn--accent">Contact us instead {Icons.arrow}</Link>
             </div>
           ) : (
-            <EmbeddedCheckoutProvider
-              stripe={stripePromise}
-              options={{ fetchClientSecret, onComplete: undefined }}
-            >
-              <EmbeddedCheckout onError={() => setFailed(true)} />
-            </EmbeddedCheckoutProvider>
+            <>
+              <p className="checkout-modal__loading">Loading secure checkout…</p>
+              <EmbeddedCheckoutProvider stripe={stripePromise} options={{ fetchClientSecret }}>
+                <EmbeddedCheckout />
+              </EmbeddedCheckoutProvider>
+            </>
           )}
         </div>
       </div>
@@ -1540,15 +1545,17 @@ input,textarea,select,button{font-family:inherit;font-size:inherit}
 .products-hero__sub{font-size:clamp(1.05rem,2vw,1.25rem);color:var(--text-muted);max-width:700px;margin-bottom:34px;line-height:1.7}
 
 /* ── Embedded Checkout modal ── */
-.checkout-modal{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
-.checkout-modal__overlay{position:fixed;inset:0;background:rgba(5,8,12,0.78);backdrop-filter:blur(4px)}
-.checkout-modal__panel{position:relative;z-index:1;width:100%;max-width:560px;background:#fff;border-radius:var(--radius-lg);padding:24px;box-shadow:0 30px 80px rgba(0,0,0,0.55);margin:auto}
+.checkout-modal{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow-y:auto}
+.checkout-modal__overlay{position:fixed;inset:0;background:rgba(5,8,12,0.82);backdrop-filter:blur(6px)}
+.checkout-modal__panel{position:relative;z-index:1;width:100%;max-width:720px;max-height:calc(100vh - 48px);background:#fff;border-radius:var(--radius-lg);padding:20px 20px 24px;box-shadow:0 30px 80px rgba(0,0,0,0.55);margin:auto;overflow:hidden;display:flex;flex-direction:column}
 .checkout-modal__close{position:absolute;top:12px;right:12px;z-index:2;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:none;border-radius:50%;background:#f1f3f4;color:#202124;cursor:pointer;transition:background 0.2s}
 .checkout-modal__close:hover{background:#e3e6e8}
-.checkout-modal__body{min-height:120px}
+.checkout-modal__body{flex:1;min-height:520px;overflow-y:auto}
+.checkout-modal__body:has(iframe) .checkout-modal__loading{display:none}
+.checkout-modal__loading{text-align:center;color:#5f6368;font-size:0.95rem;padding:48px 16px}
 .checkout-modal__error{text-align:center;padding:32px 16px;color:#202124}
 .checkout-modal__error p{margin-bottom:16px}
-@media(max-width:600px){.checkout-modal{padding:16px 8px}.checkout-modal__panel{padding:16px}}
+@media(max-width:600px){.checkout-modal{padding:0}.checkout-modal__panel{max-width:100%;max-height:100vh;height:100vh;border-radius:0;padding:16px}}
 
 /* ── Checkout result banner ── */
 .checkout-banner{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-radius:var(--radius);margin-bottom:32px;border:1px solid var(--border);background:var(--surface)}

@@ -72,6 +72,9 @@ export async function POST(req) {
     allow_promotion_codes: true,
     billing_address_collection: "auto",
     return_url: `${origin}/products?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    // Stripe Link can redirect the whole browser to checkout.stripe.com for OTP
+    // verification, which breaks the embedded on-site experience. Card-only here.
+    wallet_options: { link: { display: "never" } },
   };
 
   try {
