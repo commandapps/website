@@ -3,13 +3,17 @@ import Stripe from "stripe";
 export const runtime = "nodejs";
 
 // Server-side source of truth for pricing. Amounts are in cents (USD).
+// `priceId` points at the live reusable Price objects in Stripe so checkouts
+// don't create a throwaway product each time. The `amount` is kept as an inline
+// fallback used only if the Price can't be resolved (e.g. running with a test
+// key locally, where the live Price IDs don't exist).
 // Keep the keys in sync with the product `id`s in command-applications.jsx.
 const CATALOG = {
-  "jump-start": { name: "AI Jump Start", amount: 29700, mode: "payment" },
-  "operator-course": { name: "AI Operator Course", amount: 99700, mode: "payment" },
-  "opportunity-audit": { name: "AI Opportunity Audit", amount: 150000, mode: "payment" },
-  "advisory-retainer": { name: "AI Advisory Retainer", amount: 120000, mode: "subscription", interval: "month" },
-  "ai-built-website": { name: "AI-Built Website", amount: 150000, mode: "payment" },
+  "jump-start": { name: "AI Jump Start", amount: 29700, mode: "payment", priceId: "price_1TgPzeJ1br9Kw7PYELoPvapv" },
+  "operator-course": { name: "AI Operator Course", amount: 99700, mode: "payment", priceId: "price_1TgPzjJ1br9Kw7PYqDFZZs6X" },
+  "opportunity-audit": { name: "AI Opportunity Audit", amount: 150000, mode: "payment", priceId: "price_1TgPzkJ1br9Kw7PYb4X0SpAN" },
+  "advisory-retainer": { name: "AI Advisory Retainer", amount: 120000, mode: "subscription", interval: "month", priceId: "price_1TgPznJ1br9Kw7PY5teTVwUL" },
+  "ai-built-website": { name: "AI-Built Website", amount: 150000, mode: "payment", priceId: "price_1TgPzoJ1br9Kw7PYiKqFX7eH" },
 };
 
 function json(payload, status = 200) {
@@ -17,6 +21,21 @@ function json(payload, status = 200) {
     status,
     headers: { "Content-Type": "application/json" },
   });
+}
+
+// Inline line item, used only as a fallback when the reusable Price can't be used.
+function inlineLineItem(item) {
+  return {
+    quantity: 1,
+    price_data: {
+      currency: "usd",
+      unit_amount: item.amount,
+      product_data: { name: item.name },
+      ...(item.mode === "subscription"
+        ? { recurring: { interval: item.interval || "month" } }
+        : {}),
+    },
+  };
 }
 
 export async function POST(req) {
@@ -44,27 +63,29 @@ export async function POST(req) {
     process.env.NEXT_PUBLIC_SITE_URL ||
     "https://commandapplications.com";
 
+  const base = {
+    mode: item.mode,
+    allow_promotion_codes: true,
+    billing_address_collection: "auto",
+    success_url: `${origin}/products?checkout=success`,
+    cancel_url: `${origin}/products?checkout=cancelled`,
+  };
+
   try {
-    const session = await stripe.checkout.sessions.create({
-      mode: item.mode,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "usd",
-            unit_amount: item.amount,
-            product_data: { name: item.name },
-            ...(item.mode === "subscription"
-              ? { recurring: { interval: item.interval || "month" } }
-              : {}),
-          },
-        },
-      ],
-      allow_promotion_codes: true,
-      billing_address_collection: "auto",
-      success_url: `${origin}/products?checkout=success`,
-      cancel_url: `${origin}/products?checkout=cancelled`,
-    });
+    let session;
+    try {
+      // Preferred path: reference the reusable live Price object.
+      session = await stripe.checkout.sessions.create({
+        ...base,
+        line_items: [{ price: item.priceId, quantity: 1 }],
+      });
+    } catch {
+      // Fallback: the Price ID couldn't be used (e.g. a test key in local dev).
+      session = await stripe.checkout.sessions.create({
+        ...base,
+        line_items: [inlineLineItem(item)],
+      });
+    }
 
     return json({ ok: true, url: session.url });
   } catch {

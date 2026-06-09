@@ -759,6 +759,48 @@ function ProductCard({ p, delay }) {
   );
 }
 
+// Reads the ?checkout=success|cancelled flag Stripe redirects back with, shows
+// a dismissible banner, and strips the param so a refresh won't re-trigger it.
+function CheckoutBanner() {
+  const [status, setStatus] = useState(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const c = params.get("checkout");
+    if (c === "success" || c === "cancelled") {
+      setStatus(c);
+      params.delete("checkout");
+      const qs = params.toString();
+      window.history.replaceState(
+        {},
+        "",
+        window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash
+      );
+    }
+  }, []);
+  if (!status) return null;
+  return (
+    <div className={`checkout-banner checkout-banner--${status}`} role="status">
+      <span className="checkout-banner__icon" aria-hidden="true">
+        {status === "success" ? Icons.check : Icons.close}
+      </span>
+      <p>
+        {status === "success"
+          ? "Thank you — your purchase is confirmed. A receipt is on its way to your email, and we'll follow up shortly with next steps."
+          : "Checkout was cancelled — no charge was made. Whenever you're ready, pick up where you left off below."}
+      </p>
+      <button
+        type="button"
+        className="checkout-banner__close"
+        aria-label="Dismiss"
+        onClick={() => setStatus(null)}
+      >
+        {Icons.close}
+      </button>
+    </div>
+  );
+}
+
 function ProductsPage() {
   const [auditLoading, setAuditLoading] = useState(false);
   const scrollToProducts = (e) => {
@@ -779,6 +821,7 @@ function ProductsPage() {
       <section className="products-hero">
         <div className="hero__bg-grid" />
         <div className="container products-hero__inner">
+          <CheckoutBanner />
           <Reveal>
             <h1>
               AI isn't the future.{" "}
@@ -1464,6 +1507,17 @@ input,textarea,select,button{font-family:inherit;font-size:inherit}
 .products-hero h1{font-size:clamp(2.1rem,5vw,3.5rem);margin-bottom:22px;line-height:1.1}
 .products-hero__accent{color:var(--accent)}
 .products-hero__sub{font-size:clamp(1.05rem,2vw,1.25rem);color:var(--text-muted);max-width:700px;margin-bottom:34px;line-height:1.7}
+
+/* ── Checkout result banner ── */
+.checkout-banner{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-radius:var(--radius);margin-bottom:32px;border:1px solid var(--border);background:var(--surface)}
+.checkout-banner--success{border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.09)}
+.checkout-banner--cancelled{border-color:rgba(245,158,11,0.4);background:rgba(245,158,11,0.09)}
+.checkout-banner p{margin:0;flex:1;color:var(--text);font-size:0.95rem;line-height:1.5}
+.checkout-banner__icon{flex-shrink:0;margin-top:2px}
+.checkout-banner--success .checkout-banner__icon{color:var(--accent-2)}
+.checkout-banner--cancelled .checkout-banner__icon{color:var(--warm)}
+.checkout-banner__close{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px;flex-shrink:0;line-height:0;transition:color 0.2s}
+.checkout-banner__close:hover{color:var(--text)}
 
 /* ── Trust / Credibility bar ── */
 .trust-bar{background:var(--bg-alt);border-bottom:1px solid var(--border)}
