@@ -109,12 +109,11 @@ function Navbar() {
       <div className="container navbar__inner">
         <Link to="/" className="navbar__logo" onClick={() => setOpen(false)}>
           <img
-            src="/assets/LogoWhite.png"
+            src="/assets/CommandApplicationsLogoWhite.svg"
             alt="Command Applications"
             className="navbar__logo-img"
             loading="eager"
           />
-          <span className="navbar__logo-text">Command<br/><span>Applications</span></span>
         </Link>
         <div className={`navbar__links ${open ? "navbar__links--open" : ""}`}>
           {links.map((l) => (
@@ -141,14 +140,13 @@ function Footer() {
       <div className="container">
         <div className="footer__grid">
           <div className="footer__brand">
-            <div className="navbar__logo" style={{ marginBottom: 16 }}>
+            <div className="navbar__logo navbar__logo--footer" style={{ marginBottom: 16 }}>
               <img
-                src="/assets/LogoWhite.png"
+                src="/assets/CommandApplicationsLogoWhite.svg"
                 alt="Command Applications"
                 className="navbar__logo-img"
                 loading="lazy"
               />
-              <span className="navbar__logo-text">Command<br/><span>Applications</span></span>
             </div>
             <p className="footer__tagline">Veteran-led AI &amp; automation partner.<br/>From strategy to implementation.</p>
             <div className="footer__badge">
@@ -1339,11 +1337,11 @@ input,textarea,select,button{font-family:inherit;font-size:inherit}
 .navbar{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--nav-h);display:flex;align-items:center;transition:background 0.3s,backdrop-filter 0.3s,box-shadow 0.3s}
 .navbar--scrolled{background:rgba(11,15,20,0.85);backdrop-filter:blur(16px);box-shadow:0 1px 0 var(--border)}
 .navbar__inner{display:flex;align-items:center;justify-content:space-between;width:100%}
-.navbar__logo{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700}
-.navbar__logo-img{width:44px;height:44px;object-fit:contain}
+.navbar__logo{display:flex;align-items:center;font-family:var(--font-display);font-weight:700}
+.navbar__logo-img{height:36px;width:auto;max-width:220px;object-fit:contain;display:block}
+.navbar__logo--footer .navbar__logo-img{height:40px;max-width:240px}
+@media(max-width:480px){.navbar__logo-img{height:30px;max-width:180px}}
 .navbar__logo-mark{font-size:28px;color:var(--accent);line-height:1}
-.navbar__logo-text{font-size:14px;line-height:1.2;letter-spacing:0.01em}
-.navbar__logo-text span{color:var(--text-muted);font-weight:400}
 .navbar__links{display:flex;align-items:center;gap:32px}
 .navbar__link{font-size:14px;font-weight:500;color:var(--text-muted);transition:color 0.2s}
 .navbar__link:hover{color:var(--text)}
