@@ -63,12 +63,15 @@ export async function POST(req) {
     process.env.NEXT_PUBLIC_SITE_URL ||
     "https://commandapplications.com";
 
+  // Embedded Checkout keeps the customer on our domain. Stripe redirects to
+  // return_url only after payment completes; there is no cancel_url (the user
+  // simply closes the modal).
   const base = {
+    ui_mode: "embedded_page",
     mode: item.mode,
     allow_promotion_codes: true,
     billing_address_collection: "auto",
-    success_url: `${origin}/products?checkout=success`,
-    cancel_url: `${origin}/products?checkout=cancelled`,
+    return_url: `${origin}/products?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
   };
 
   try {
@@ -87,7 +90,7 @@ export async function POST(req) {
       });
     }
 
-    return json({ ok: true, url: session.url });
+    return json({ ok: true, clientSecret: session.client_secret });
   } catch {
     // Avoid leaking Stripe error internals to the client.
     return json({ ok: false, error: "Could not start checkout." }, 502);

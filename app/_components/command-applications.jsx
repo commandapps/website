@@ -1,4 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
+
+// Publishable key is inlined at build time (NEXT_PUBLIC_*). In Vercel this must
+// be the LIVE publishable key (pk_live_…) and match the live secret key.
+const STRIPE_PK =
+  typeof process !== "undefined" ? process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY : undefined;
+const stripePromise = STRIPE_PK ? loadStripe(STRIPE_PK) : null;
 
 /* ─────────────────────────────────────────────
    COMMAND APPLICATIONS — Full Production Site
@@ -693,34 +701,62 @@ const PRODUCT_TIERS = [
   },
 ];
 
-// Starts a Stripe Checkout Session for a product and redirects to the hosted
-// page. On any failure it falls back to the contact page so a CTA never dead-ends.
-async function startStripeCheckout(productId) {
-  try {
+// Embedded Checkout modal — mounts Stripe's checkout form in-page so the
+// customer never leaves commandapplications.com.
+function CheckoutModal({ productId, onClose }) {
+  const [failed, setFailed] = useState(false);
+
+  const fetchClientSecret = useCallback(async () => {
     const res = await fetch("/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId }),
     });
     const data = await res.json();
-    if (data?.url) {
-      window.location.href = data.url;
-      return;
-    }
-  } catch {
-    // fall through to fallback
-  }
-  window.location.href = "/contact";
+    if (!data?.clientSecret) throw new Error("no_client_secret");
+    return data.clientSecret;
+  }, [productId]);
+
+  // Lock body scroll while open + close on Escape.
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
+  return (
+    <div className="checkout-modal" role="dialog" aria-modal="true" aria-label="Secure checkout">
+      <div className="checkout-modal__overlay" onClick={onClose} />
+      <div className="checkout-modal__panel">
+        <button type="button" className="checkout-modal__close" onClick={onClose} aria-label="Close checkout">
+          {Icons.close}
+        </button>
+        <div className="checkout-modal__body">
+          {!stripePromise || failed ? (
+            <div className="checkout-modal__error">
+              <p>We couldn't start secure checkout right now.</p>
+              <Link to="/contact" className="btn btn--accent">Contact us instead {Icons.arrow}</Link>
+            </div>
+          ) : (
+            <EmbeddedCheckoutProvider
+              stripe={stripePromise}
+              options={{ fetchClientSecret, onComplete: undefined }}
+            >
+              <EmbeddedCheckout onError={() => setFailed(true)} />
+            </EmbeddedCheckoutProvider>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function ProductCard({ p, delay }) {
-  const [loading, setLoading] = useState(false);
-  const onBuy = async () => {
-    if (loading) return;
-    setLoading(true);
-    await startStripeCheckout(p.id);
-    setLoading(false);
-  };
+function ProductCard({ p, delay, onCheckout }) {
   return (
     <Reveal delay={delay} className="pcard-wrap">
       <article className={`pcard ${p.featured ? "pcard--featured" : ""}`}>
@@ -746,13 +782,10 @@ function ProductCard({ p, delay }) {
         </ul>
         <button
           type="button"
-          onClick={onBuy}
-          disabled={loading}
-          aria-busy={loading}
+          onClick={() => onCheckout(p.id)}
           className={`btn ${p.featured ? "btn--warm" : "btn--accent"} btn--full pcard__cta`}
-          style={loading ? { opacity: 0.8, cursor: "not-allowed" } : undefined}
         >
-          {loading ? "Starting checkout…" : <>{p.cta} {Icons.arrow}</>}
+          {p.cta} {Icons.arrow}
         </button>
       </article>
     </Reveal>
@@ -770,6 +803,7 @@ function CheckoutBanner() {
     if (c === "success" || c === "cancelled") {
       setStatus(c);
       params.delete("checkout");
+      params.delete("session_id");
       const qs = params.toString();
       window.history.replaceState(
         {},
@@ -802,17 +836,13 @@ function CheckoutBanner() {
 }
 
 function ProductsPage() {
-  const [auditLoading, setAuditLoading] = useState(false);
+  const [checkoutProduct, setCheckoutProduct] = useState(null);
+  const openCheckout = (productId) => setCheckoutProduct(productId);
+  const closeCheckout = () => setCheckoutProduct(null);
   const scrollToProducts = (e) => {
     e.preventDefault();
     if (typeof document === "undefined") return;
     document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
-  };
-  const onBookAudit = async () => {
-    if (auditLoading) return;
-    setAuditLoading(true);
-    await startStripeCheckout("opportunity-audit");
-    setAuditLoading(false);
   };
 
   return (
@@ -881,7 +911,7 @@ function ProductsPage() {
               </Reveal>
               <div className={`pcards ${t.cols}`}>
                 {t.products.map((p, i) => (
-                  <ProductCard key={p.id} p={p} delay={i * 90} />
+                  <ProductCard key={p.id} p={p} delay={i * 90} onCheckout={openCheckout} />
                 ))}
               </div>
             </div>
@@ -930,13 +960,10 @@ function ProductsPage() {
               <div className="cta-section__btns">
                 <button
                   type="button"
-                  onClick={onBookAudit}
-                  disabled={auditLoading}
-                  aria-busy={auditLoading}
+                  onClick={() => openCheckout("opportunity-audit")}
                   className="btn btn--warm btn--lg"
-                  style={auditLoading ? { opacity: 0.8, cursor: "not-allowed" } : undefined}
                 >
-                  {auditLoading ? "Starting checkout…" : <>Book your audit — $1,500 {Icons.arrow}</>}
+                  Book your audit — $1,500 {Icons.arrow}
                 </button>
               </div>
               {/* TODO: wire to the free email course signup (e.g. newsletter/ESP link) */}
@@ -945,6 +972,10 @@ function ProductsPage() {
           </Reveal>
         </div>
       </section>
+
+      {checkoutProduct && (
+        <CheckoutModal productId={checkoutProduct} onClose={closeCheckout} />
+      )}
     </main>
   );
 }
@@ -1507,6 +1538,17 @@ input,textarea,select,button{font-family:inherit;font-size:inherit}
 .products-hero h1{font-size:clamp(2.1rem,5vw,3.5rem);margin-bottom:22px;line-height:1.1}
 .products-hero__accent{color:var(--accent)}
 .products-hero__sub{font-size:clamp(1.05rem,2vw,1.25rem);color:var(--text-muted);max-width:700px;margin-bottom:34px;line-height:1.7}
+
+/* ── Embedded Checkout modal ── */
+.checkout-modal{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.checkout-modal__overlay{position:fixed;inset:0;background:rgba(5,8,12,0.78);backdrop-filter:blur(4px)}
+.checkout-modal__panel{position:relative;z-index:1;width:100%;max-width:560px;background:#fff;border-radius:var(--radius-lg);padding:24px;box-shadow:0 30px 80px rgba(0,0,0,0.55);margin:auto}
+.checkout-modal__close{position:absolute;top:12px;right:12px;z-index:2;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:none;border-radius:50%;background:#f1f3f4;color:#202124;cursor:pointer;transition:background 0.2s}
+.checkout-modal__close:hover{background:#e3e6e8}
+.checkout-modal__body{min-height:120px}
+.checkout-modal__error{text-align:center;padding:32px 16px;color:#202124}
+.checkout-modal__error p{margin-bottom:16px}
+@media(max-width:600px){.checkout-modal{padding:16px 8px}.checkout-modal__panel{padding:16px}}
 
 /* ── Checkout result banner ── */
 .checkout-banner{display:flex;align-items:flex-start;gap:12px;padding:16px 18px;border-radius:var(--radius);margin-bottom:32px;border:1px solid var(--border);background:var(--surface)}
