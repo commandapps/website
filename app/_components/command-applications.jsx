@@ -109,9 +109,9 @@ function Navbar() {
       <div className="container navbar__inner">
         <Link to="/" className="navbar__logo" onClick={() => setOpen(false)}>
           <img
-            src="/assets/CommandApplicationsLogoWhite.svg"
+            src="/assets/CommandApplicationsIcon.svg"
             alt="Command Applications"
-            className="navbar__logo-img"
+            className="navbar__logo-img navbar__logo-img--icon"
             loading="eager"
           />
         </Link>
@@ -142,9 +142,9 @@ function Footer() {
           <div className="footer__brand">
             <div className="navbar__logo navbar__logo--footer" style={{ marginBottom: 16 }}>
               <img
-                src="/assets/CommandApplicationsLogoWhite.svg"
+                src="/assets/CommandApplicationsIcon.svg"
                 alt="Command Applications"
-                className="navbar__logo-img"
+                className="navbar__logo-img navbar__logo-img--icon"
                 loading="lazy"
               />
             </div>
@@ -1339,8 +1339,9 @@ input,textarea,select,button{font-family:inherit;font-size:inherit}
 .navbar__inner{display:flex;align-items:center;justify-content:space-between;width:100%}
 .navbar__logo{display:flex;align-items:center;font-family:var(--font-display);font-weight:700}
 .navbar__logo-img{height:36px;width:auto;max-width:220px;object-fit:contain;display:block}
-.navbar__logo--footer .navbar__logo-img{height:40px;max-width:240px}
-@media(max-width:480px){.navbar__logo-img{height:30px;max-width:180px}}
+.navbar__logo-img--icon{height:40px;max-width:40px}
+.navbar__logo--footer .navbar__logo-img--icon{height:44px;max-width:44px}
+@media(max-width:480px){.navbar__logo-img--icon{height:34px;max-width:34px}}
 .navbar__logo-mark{font-size:28px;color:var(--accent);line-height:1}
 .navbar__links{display:flex;align-items:center;gap:32px}
 .navbar__link{font-size:14px;font-weight:500;color:var(--text-muted);transition:color 0.2s}
