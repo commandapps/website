@@ -1182,10 +1182,11 @@ function ContactPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Failed to send message.");
       setSubmitted(true);
-    } catch {
-      setError("Sorry—something went wrong sending your message. Please try again.");
+    } catch (err) {
+      setError(err.message || "Sorry—something went wrong sending your message. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -1242,46 +1243,46 @@ function ContactPage() {
                 ) : (
                   <div>
                     <h3>Send us a message</h3>
-                    <div className="contact-form">
+                    <form className="contact-form" onSubmit={handleSubmit} noValidate>
                       <div className="form-group">
-                        <label>Your Name *</label>
-                        <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required placeholder="Jane Smith" />
+                        <label htmlFor="contact-name">Your Name *</label>
+                        <input id="contact-name" type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required placeholder="Jane Smith" />
                       </div>
                       <div className="form-group">
-                        <label>Email Address *</label>
-                        <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required placeholder="jane@company.com" />
+                        <label htmlFor="contact-email">Email Address *</label>
+                        <input id="contact-email" type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required placeholder="jane@company.com" />
                       </div>
                       <div className="form-group">
-                        <label>Organization</label>
-                        <input type="text" value={form.org} onChange={e => setForm({...form, org: e.target.value})} placeholder="Acme Corp" />
+                        <label htmlFor="contact-org">Organization</label>
+                        <input id="contact-org" type="text" value={form.org} onChange={e => setForm({...form, org: e.target.value})} placeholder="Acme Corp" />
                       </div>
                       <div className="form-group">
-                        <label>What are you interested in?</label>
-                        <select value={form.interest} onChange={e => setForm({...form, interest: e.target.value})}>
+                        <label htmlFor="contact-interest">What are you interested in?</label>
+                        <select id="contact-interest" value={form.interest} onChange={e => setForm({...form, interest: e.target.value})}>
                           <option value="">Select an option</option>
                           <option value="training">AI Training</option>
                           <option value="automation">Workflow Automation</option>
                           <option value="advisory">AI Advisory &amp; Implementation</option>
                           <option value="build">Custom AI Application</option>
+                          <option value="products">Products / Courses</option>
                           <option value="general">General Inquiry</option>
                         </select>
                       </div>
                       <div className="form-group form-group--full">
-                        <label>Tell us about your situation *</label>
-                        <textarea rows={5} value={form.message} onChange={e => setForm({...form, message: e.target.value})} required placeholder="What challenges are you facing? What are you hoping to achieve?" />
+                        <label htmlFor="contact-message">Tell us about your situation *</label>
+                        <textarea id="contact-message" rows={5} value={form.message} onChange={e => setForm({...form, message: e.target.value})} required placeholder="What challenges are you facing? What are you hoping to achieve?" />
                       </div>
                       {error ? <p style={{ gridColumn: "1 / -1", color: "var(--danger)", marginTop: 8 }}>{error}</p> : null}
                       <button
-                        type="button"
+                        type="submit"
                         className="btn btn--accent btn--lg btn--full"
-                        onClick={handleSubmit}
                         disabled={submitting}
                         aria-disabled={submitting}
                         style={submitting ? { opacity: 0.8, cursor: "not-allowed" } : undefined}
                       >
                         {submitting ? "Sending..." : "Send Message"} {Icons.arrow}
                       </button>
-                    </div>
+                    </form>
                   </div>
                 )}
               </div>
