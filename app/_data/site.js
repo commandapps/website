@@ -7,9 +7,11 @@ export const SITE = {
   legalName: "Command Applications LLC",
   url: "https://commandapplications.com",
   email: "contact@commandapplications.com",
-  // REPLACE: confirm the real LinkedIn handle if different.
-  linkedin: "https://www.linkedin.com/in/charlieeadie",
-  founderSite: "https://charlieeadie.com",
+  // Company LinkedIn page. REPLACE: set the real Command Applications company
+  // URL. Left blank on purpose so no placeholder/broken link renders publicly;
+  // LinkedIn links are hidden until this is set (never the founder's personal
+  // profile).
+  linkedin: "",
   oneLiner:
     "Command Applications installs the AI Operating System your business runs on — built and delivered with the discipline of a veteran-led team.",
 };
@@ -26,6 +28,32 @@ export const CREDENTIALS = [
   "Marshall Scholar",
   "Airborne Ranger · Combat Veteran",
   "Chief Growth Officer, venture-backed AI company",
+];
+
+// Veteran-led team. Render via a data array so members drop in/out cleanly.
+// Kylie is gated behind SHOW_KYLIE: keep false until she has confirmed joining
+// and consented to being named publicly. Presented strictly by merit — no
+// family relationship is stated. The employer is never named.
+export const SHOW_KYLIE = false;
+
+export const TEAM = [
+  {
+    name: "Charlie Eadie",
+    role: "Founder",
+    photo: "/assets/charlie-eadie-headshot.png",
+    blurb:
+      "West Point graduate (#2 in class), Marshall Scholar (LSE & King's College London), Airborne Ranger and combat veteran of Iraq & Afghanistan, now Chief Growth Officer at a venture-backed AI company.",
+  },
+  ...(SHOW_KYLIE
+    ? [
+        {
+          name: "Kylie Park",
+          role: "AI Strategist",
+          blurb:
+            "Studying Computer Science and Mathematics at the University of South Carolina, Kylie brings the analytical and technical horsepower behind our builds.",
+        },
+      ]
+    : []),
 ];
 
 // The three AI Engine tiers (prompt §3.5). Prices are client-provided and real.
@@ -94,7 +122,7 @@ export const FAQ = [
   },
   {
     q: "Do I need a technical team?",
-    a: "No. That's the point of working with us. We build, connect, and deploy the systems, then train your team to run and extend them. You don't need engineers on staff — you need people who want their manual work to disappear.",
+    a: "No. We build, connect, deploy, and keep running the systems with you. You don't need engineers on staff — you need people who want their manual work to disappear.",
   },
   {
     q: "Is my data safe?",
@@ -114,6 +142,6 @@ export const FAQ = [
   },
   {
     q: "What exactly gets built, and who builds it?",
-    a: "Automations, AI agents, and internal tools wired into your real workflows — scoped to your highest-ROI opportunities first. A veteran-led team builds it, deploys it, trains your people, and stays on to support it. You get working systems, not a strategy deck.",
+    a: "Automations and AI agents wired into your real workflows — the modules of your AI Operating System, scoped to your highest-ROI opportunities first. A veteran-led team builds it, deploys it, and stays on to run and support it. You get working systems, not a strategy deck.",
   },
 ];

@@ -2,7 +2,7 @@ import { SITE } from "./_data/site";
 
 export default function sitemap() {
   const now = new Date();
-  const routes = ["", "/services", "/method", "/work", "/about", "/contact"];
+  const routes = ["", "/services", "/method", "/about", "/contact"];
   return routes.map((path) => ({
     url: `${SITE.url}${path}`,
     lastModified: now,

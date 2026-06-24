@@ -45,6 +45,7 @@ export const metadata = {
 function StructuredData() {
   const personId = `${SITE.url}/#founder`;
   const orgId = `${SITE.url}/#organization`;
+  const sameAs = [SITE.linkedin].filter(Boolean);
   const data = {
     "@context": "https://schema.org",
     "@graph": [
@@ -59,7 +60,7 @@ function StructuredData() {
           "Veteran-led, SDVOSB-certified team that builds, installs, and supports the AI Operating System your business runs on.",
         slogan: SITE.oneLiner,
         areaServed: "US",
-        sameAs: [SITE.linkedin, SITE.founderSite],
+        ...(sameAs.length ? { sameAs } : {}),
         founder: { "@id": personId },
         knowsAbout: [
           "Artificial Intelligence",
@@ -79,7 +80,7 @@ function StructuredData() {
           "London School of Economics",
           "King's College London",
         ],
-        sameAs: [SITE.founderSite, SITE.linkedin],
+        ...(sameAs.length ? { sameAs } : {}),
       },
     ],
   };

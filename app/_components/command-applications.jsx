@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
-import { SITE, AIOS_DEFINITION, CREDENTIALS, TIERS, FAQ } from "../_data/site";
+import { SITE, AIOS_DEFINITION, CREDENTIALS, TIERS, FAQ, TEAM } from "../_data/site";
 
 // Cal.com embed is loaded only on /contact (and only client-side) so it never
 // weighs down the other routes' bundles.
@@ -119,7 +119,6 @@ function Navbar() {
   const links = [
     { to: "/services", label: "Services" },
     { to: "/method", label: "Method" },
-    { to: "/work", label: "Work" },
     { to: "/about", label: "About" },
   ];
   return (
@@ -191,14 +190,15 @@ function Footer() {
             <h4>Company</h4>
             <Link to="/method">The Command Method</Link>
             <Link to="/about">About</Link>
-            <Link to="/work">Work</Link>
-            <a href={SITE.founderSite} target="_blank" rel="noopener">charlieeadie.com</a>
+            <Link to="/services">What We Install</Link>
           </div>
           <div className="footer__col">
             <h4>Get Started</h4>
             <Link to="/contact">{PRIMARY_CTA}</Link>
             <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
-            <a href={SITE.linkedin} target="_blank" rel="noopener">LinkedIn</a>
+            {SITE.linkedin ? (
+              <a href={SITE.linkedin} target="_blank" rel="noopener">LinkedIn</a>
+            ) : null}
           </div>
         </div>
         <div className="footer__bottom">
@@ -305,44 +305,57 @@ function FAQAccordion() {
   );
 }
 
-// ── Founder section (prompt §3.6a) ──
-function FounderSection() {
+// ── Veteran-Led Team section (prompt §3.6a + TEAM block) ──
+// Data-driven from TEAM so members add/remove cleanly. Members are presented by
+// merit only. `condensed` (Home) adds a CTA row; `alt` toggles the alt bg.
+function TeamSection({ condensed = false, alt = false }) {
   return (
-    <section className="section section--alt">
+    <section className={`section ${alt ? "section--alt" : ""}`}>
       <div className="container">
-        <div className="founder">
-          <Reveal className="founder__media">
-            <img
-              src={HEADSHOT}
-              alt="Charlie Eadie, founder of Command Applications"
-              className="founder__photo"
-              loading="lazy"
-              width={520}
-              height={520}
-            />
-          </Reveal>
-          <Reveal delay={100} className="founder__content">
-            <span className="kicker">Why veteran-led actually means something here</span>
-            <h2>Veteran-led isn&apos;t a badge. It&apos;s how the work gets done.</h2>
-            <p>Elite training, real combat leadership, and current hands-on work building AI inside a venture-backed company mean the systems we install are scoped, built, and supported with operator-grade accountability. This is the standard your engagement is held to.</p>
-            <ul className="founder__creds">
-              <li>{Icons.check} <span><strong>West Point graduate, #2 in class</strong> — led in one of the most demanding leadership environments in the world.</span></li>
-              <li>{Icons.check} <span><strong>Marshall Scholar</strong> — LSE &amp; King&apos;s College London.</span></li>
-              <li>{Icons.check} <span><strong>Airborne Ranger, combat veteran</strong> — Iraq &amp; Afghanistan. The discipline behind &ldquo;we don&apos;t leave until it works.&rdquo;</span></li>
-              <li>{Icons.check} <span><strong>Chief Growth Officer at a venture-backed AI company</strong> — applied AI and data, every day.</span></li>
-              <li>{Icons.check} <span><strong>Founder &amp; builder of BipolarAware</strong> — ships real, production-grade AI products.</span></li>
-            </ul>
-            <p className="founder__personal">Charlie is also a cancer survivor, an openly bipolar mental-health advocate, and a keynote speaker — the same lived experience that drives BipolarAware.</p>
-            <div className="founder__links">
-              <a href={SITE.founderSite} target="_blank" rel="noopener" className="founder__link">Read the full story {Icons.external}</a>
-              <Link to="/work" className="founder__link">See BipolarAware {Icons.arrow}</Link>
-            </div>
-            <div className="founder__cta">
-              <Link to="/contact" className="btn btn--accent">{PRIMARY_CTA} {Icons.arrow}</Link>
-              <a href={SITE.linkedin} target="_blank" rel="noopener" className="btn btn--outline">{Icons.linkedin} Connect on LinkedIn</a>
-            </div>
-          </Reveal>
+        <Reveal>
+          <div className="section__header">
+            <span className="kicker">Veteran-Led Team</span>
+            <h2>Veteran-led. Built by operators.</h2>
+            <p className="section__lead">The same operational discipline that delivers in complex environments is how every engagement is scoped, built, and supported.</p>
+          </div>
+        </Reveal>
+        <div className={`team ${TEAM.length === 1 ? "team--single" : ""}`}>
+          {TEAM.map((m, i) => (
+            <Reveal key={m.name} delay={i * 100}>
+              <article className="team-card">
+                {m.photo ? (
+                  <img
+                    src={m.photo}
+                    alt={`${m.name}, ${m.role} at Command Applications`}
+                    className="team-card__photo"
+                    loading="lazy"
+                    width={200}
+                    height={200}
+                  />
+                ) : (
+                  <div className="team-card__photo team-card__photo--initial" aria-hidden="true">
+                    {m.name.charAt(0)}
+                  </div>
+                )}
+                <div className="team-card__body">
+                  <h3 className="team-card__name">{m.name}</h3>
+                  <p className="team-card__role">{m.role}</p>
+                  <p className="team-card__blurb">{m.blurb}</p>
+                </div>
+              </article>
+            </Reveal>
+          ))}
         </div>
+        {condensed ? (
+          <Reveal delay={120}>
+            <div className="section__cta-row">
+              <Link to="/contact" className="btn btn--accent btn--lg">{PRIMARY_CTA} {Icons.arrow}</Link>
+              {SITE.linkedin ? (
+                <a href={SITE.linkedin} target="_blank" rel="noopener" className="btn btn--outline">{Icons.linkedin} LinkedIn</a>
+              ) : null}
+            </div>
+          </Reveal>
+        ) : null}
       </div>
     </section>
   );
@@ -352,8 +365,8 @@ function FounderSection() {
 const METHOD_STAGES = [
   { num: "01", name: "Recon", desc: "We map your workflows, bottlenecks, and the highest-ROI opportunities.", deliverable: "Prioritized AI build queue" },
   { num: "02", name: "Foundations", desc: "We connect your existing tools and data into one operating layer.", deliverable: "Working AIOS backbone" },
-  { num: "03", name: "Build", desc: "We build the automations, agents, and internal tools your team actually uses.", deliverable: "Deployed systems, not demos" },
-  { num: "04", name: "Install & Train", desc: "We roll it out, train your team, and document everything.", deliverable: "Adoption, not orphaned projects" },
+  { num: "03", name: "Build", desc: "We build the automations and AI agents your team actually uses.", deliverable: "Deployed systems, not demos" },
+  { num: "04", name: "Install & Hand Off", desc: "We roll it out, onboard your team, and document everything.", deliverable: "Adoption, not orphaned projects" },
   { num: "05", name: "Hold the Line", desc: "Ongoing support, monitoring, and iteration.", deliverable: "Systems that keep working" },
 ];
 
@@ -364,7 +377,7 @@ function HomePage() {
   const pillars = [
     { icon: Icons.automate, name: "Install", tagline: "Automate the work slowing your team down.", body: "We wire AI into your real workflows so the repeatable, manual work runs itself.", mockup: "workflow" },
     { icon: Icons.acquire, name: "Acquire", tagline: "Turn AI into more revenue and pipeline.", body: "Outreach, qualification, and follow-up that keep your pipeline moving while you sleep.", mockup: "inbox" },
-    { icon: Icons.support, name: "Support", tagline: "A veteran-led team that stays until it works.", body: "We don't hand over a deck and disappear. We deploy, train, and hold the line.", mockup: "team" },
+    { icon: Icons.support, name: "Support", tagline: "A veteran-led team that stays until it works.", body: "We don't hand over a deck and disappear. We deploy, run it with you, and hold the line.", mockup: "team" },
     { icon: Icons.scale, name: "Scale", tagline: "Compound early wins into an operating advantage.", body: "Each module builds on the last until your whole operation moves faster.", mockup: "chart" },
   ];
   return (
@@ -425,20 +438,11 @@ function HomePage() {
       {/* ── Positioning statement (§3.3) ── */}
       <section className="section">
         <div className="container">
-          <div className="positioning">
-            <Reveal className="positioning__main">
-              <span className="kicker">The Thesis</span>
-              <h2>Stop buying scattered AI tools. Install the system your business runs on.</h2>
-              <p>{AIOS_DEFINITION}</p>
-            </Reveal>
-            <Reveal delay={120} className="positioning__aside">
-              {/* TestimonialPlaceholder — never fabricate a quote (prompt §1, §3.3). */}
-              <div className="placeholder-box">
-                <span className="placeholder-box__tag">REPLACE</span>
-                <p>Client testimonial goes here. Pull a real quote from an engagement before shipping — do not invent one.</p>
-              </div>
-            </Reveal>
-          </div>
+          <Reveal className="positioning positioning--solo">
+            <span className="kicker">The Thesis</span>
+            <h2>Stop buying scattered AI tools. Install the system your business runs on.</h2>
+            <p>{AIOS_DEFINITION}</p>
+          </Reveal>
         </div>
       </section>
 
@@ -511,11 +515,11 @@ function HomePage() {
         </div>
       </section>
 
-      {/* ── Founder (§3.6a) ── */}
-      <FounderSection />
+      {/* ── Veteran-Led Team (§3.6a) ── */}
+      <TeamSection condensed />
 
       {/* ── The Command Method (§3.7) ── */}
-      <section className="section">
+      <section className="section section--alt">
         <div className="container">
           <Reveal>
             <div className="section__header">
@@ -544,7 +548,7 @@ function HomePage() {
       </section>
 
       {/* ── Fit Check (§3.8) ── */}
-      <section className="section section--alt">
+      <section className="section">
         <div className="container">
           <Reveal>
             <div className="section__header">
@@ -587,55 +591,6 @@ function HomePage() {
               <Link to="/contact" className="btn btn--accent btn--lg">{PRIMARY_CTA} {Icons.arrow}</Link>
             </div>
           </Reveal>
-        </div>
-      </section>
-
-      {/* ── Featured work (§3.9) ── */}
-      <section className="section">
-        <div className="container">
-          <Reveal>
-            <div className="section__header">
-              <span className="kicker">Featured Work</span>
-              <h2>BipolarAware — a production-grade AI product, built end to end</h2>
-              <p className="section__lead">The flagship build that shows how we take a complex problem and ship a real, AI-powered system.</p>
-            </div>
-          </Reveal>
-          <Reveal delay={80}>
-            <div className="case-highlight">
-              <div className="case-highlight__grid">
-                <div className="case-highlight__item">
-                  <h4>The Problem</h4>
-                  <p>People living with bipolar disorder lack accessible daily tools to track mood patterns, spot early warning signs, and share structured data with care providers.</p>
-                </div>
-                <div className="case-highlight__item">
-                  <h4>The Solution</h4>
-                  <p>A platform combining structured mood tracking, AI-driven pattern analysis, configurable alerting for care teams, and a calm, trustworthy interface.</p>
-                </div>
-                <div className="case-highlight__item">
-                  <h4>Capabilities Demonstrated</h4>
-                  <p>Product strategy, applied AI, workflow and alerting logic, user-centered UX, and full-stack delivery.</p>
-                </div>
-                <div className="case-highlight__item">
-                  <h4>Why It Matters</h4>
-                  <p>It proves we take complex, sensitive problems and ship working software — the same approach we bring to every engagement.</p>
-                </div>
-              </div>
-              <div className="case-highlight__cta">
-                <Link to="/work" className="btn btn--accent">See full case study {Icons.arrow}</Link>
-              </div>
-            </div>
-          </Reveal>
-          <div className="cards-grid cards-grid--3" style={{ marginTop: 24 }}>
-            {[1, 2, 3].map((n) => (
-              <Reveal key={n} delay={n * 70}>
-                <div className="card card--flat card--placeholder">
-                  <span className="card__status">REPLACE</span>
-                  <h3>Client win #{n}</h3>
-                  <p>Real client case study slot. Add the engagement, the workflow installed, and the measured outcome as wins land.</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -710,7 +665,7 @@ function ServicesPage() {
   const pillars = [
     { name: "Install", tagline: "Automate the work slowing your team down.", body: "We map the repeatable, manual workflows eating your team's hours, then wire AI and automation into your existing stack so they run without anyone babysitting them." },
     { name: "Acquire", tagline: "Turn AI into more revenue and pipeline.", body: "Lead capture, qualification, outreach, and follow-up — automated and consistent — so your pipeline keeps moving and nothing slips through the cracks." },
-    { name: "Support", tagline: "A veteran-led team that stays until it works.", body: "We deploy, train your people, and stay on to monitor and iterate. No orphaned projects, no 'good luck' handoff." },
+    { name: "Support", tagline: "A veteran-led team that stays until it works.", body: "We don't hand over a deck and disappear. We deploy, run it with you, and hold the line — monitoring and iterating, with no 'good luck' handoff." },
     { name: "Scale", tagline: "Compound early wins into an operating advantage.", body: "Each module builds on the last. What starts as one automated workflow becomes an operating layer across how you sell, operate, deliver, and report." },
   ];
   return (
@@ -819,98 +774,6 @@ function MethodPage() {
 }
 
 /* ═══════════════════════════════════════════
-   PAGE: WORK / CASE STUDIES
-   ═══════════════════════════════════════════ */
-function WorkPage() {
-  return (
-    <main>
-      <section className="page-hero">
-        <div className="container">
-          <Reveal><span className="kicker">Our Work</span></Reveal>
-          <Reveal delay={60}><h1>Real products. Real capabilities. Real proof.</h1></Reveal>
-          <Reveal delay={120}><p className="page-hero__sub">We build systems that solve actual problems. Here&apos;s our flagship build — with client case studies landing as engagements complete.</p></Reveal>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="container">
-          <Reveal>
-            <div className="case-study">
-              <div className="case-study__label">Flagship Build</div>
-              <h2 className="case-study__title">BipolarAware</h2>
-              <p className="case-study__subtitle">AI-Enabled Mental Health Support Platform</p>
-
-              <div className="case-study__section">
-                <h3>Challenge</h3>
-                <p>People living with bipolar disorder face a daily challenge: tracking mood patterns, recognizing early warning signs of manic or depressive episodes, and communicating meaningful data to care providers. Most existing tools are either too simplistic to be useful or too clinical to encourage consistent use.</p>
-              </div>
-
-              <div className="case-study__section">
-                <h3>Solution Concept</h3>
-                <p>BipolarAware combines daily structured mood and behavior tracking, AI-powered pattern recognition that identifies trends and early warning signs, configurable alerts that notify care teams when concerning patterns emerge, and an intuitive, calming interface designed to encourage consistent daily use.</p>
-              </div>
-
-              <div className="case-study__section">
-                <h3>Capabilities Demonstrated</h3>
-                <div className="case-study__caps">
-                  {[
-                    { title: "Product Strategy", desc: "Defined the vision, user needs, and feature prioritization for a sensitive, complex problem space." },
-                    { title: "User-Centered Design", desc: "Balanced clinical utility with approachability to drive consistent engagement." },
-                    { title: "Applied AI", desc: "Pattern analysis that surfaces actionable insights from self-reported behavioral data." },
-                    { title: "Workflow & Alerting", desc: "Configurable notification systems that connect users to their support network." },
-                    { title: "Full-Stack Delivery", desc: "A working application from database design through frontend to deployment." },
-                    { title: "Reporting & Dashboards", desc: "Structured views that turn raw entries into meaningful trends." },
-                  ].map((c, i) => (
-                    <div key={i} className="case-study__cap">
-                      <h4>{c.title}</h4>
-                      <p>{c.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="case-study__section">
-                <h3>Why It Matters for Clients</h3>
-                <p>BipolarAware shows exactly what we deliver: the ability to take a complex, ambiguous problem, define a clear vision, and build a working system that combines thoughtful design with practical AI. That&apos;s the caliber of work we bring to every engagement.</p>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="section section--alt">
-        <div className="container">
-          <Reveal>
-            <div className="section__header">
-              <span className="kicker">More Work</span>
-              <h2>Client case studies</h2>
-              <p className="section__lead">Placeholders for real client wins. Each will document the workflow installed and the measured outcome.</p>
-            </div>
-          </Reveal>
-          <div className="cards-grid cards-grid--3">
-            {[
-              { title: "Workflow Automation", desc: "Manual work removed for an operations-heavy team." },
-              { title: "Acquisition Engine", desc: "Outreach and qualification automated for a founder-led company." },
-              { title: "Internal Operations Tool", desc: "A custom dashboard and alerting system for a growing team." },
-            ].map((c, i) => (
-              <Reveal key={i} delay={i * 80}>
-                <div className="card card--flat card--placeholder">
-                  <span className="card__status">REPLACE</span>
-                  <h3>{c.title}</h3>
-                  <p>{c.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <CTASection headline="Have a project in mind?" sub="Whether it's a workflow problem, an acquisition gap, or an AI idea to validate — we'd like to hear about it." />
-    </main>
-  );
-}
-
-/* ═══════════════════════════════════════════
    PAGE: ABOUT (prompt §8)
    ═══════════════════════════════════════════ */
 function AboutPage() {
@@ -933,31 +796,21 @@ function AboutPage() {
             <Reveal delay={100} className="about-split__content">
               <h2>The founder</h2>
               <p>Command Applications is led by a founder whose record makes &ldquo;veteran-led discipline&rdquo; literal, not decorative: a West Point graduate ranked #2 in class, a Marshall Scholar at LSE and King&apos;s College London, an Airborne Ranger and combat veteran of Iraq and Afghanistan.</p>
-              <p>Today he serves as Chief Growth Officer at a venture-backed AI company and builds BipolarAware, a production-grade AI mental-health platform. That combination — elite training, real combat leadership, and current hands-on AI work — means the systems we install are scoped, built, and supported with operator-grade accountability.</p>
+              <p>Today he serves as Chief Growth Officer at a venture-backed AI company, building and shipping applied AI every day. That combination — elite training, real combat leadership, and current hands-on AI work — means the systems we install are scoped, built, and supported with operator-grade accountability.</p>
               <p>This is the standard your engagement is held to.</p>
               <ul className="founder__creds">
                 <li>{Icons.check} <span>West Point graduate, #2 in class</span></li>
                 <li>{Icons.check} <span>Marshall Scholar — LSE &amp; King&apos;s College London</span></li>
                 <li>{Icons.check} <span>Airborne Ranger; combat deployments to Iraq &amp; Afghanistan</span></li>
                 <li>{Icons.check} <span>Chief Growth Officer, venture-backed AI company</span></li>
-                <li>{Icons.check} <span>Founder of Command Applications &amp; BipolarAware</span></li>
+                <li>{Icons.check} <span>Founder of Command Applications</span></li>
               </ul>
             </Reveal>
           </div>
         </div>
       </section>
 
-      <section className="section section--alt">
-        <div className="container">
-          <Reveal>
-            <div className="about-story__block" style={{ maxWidth: 760 }}>
-              <h2>The fuller story, briefly</h2>
-              <p>Charlie is also a cancer survivor, an openly bipolar mental-health advocate, and a keynote speaker. That lived experience is the authentic root of BipolarAware and of this company&apos;s mission. We keep it brief here on purpose — if you want the full arc, it lives on the speaker site.</p>
-              <a href={SITE.founderSite} target="_blank" rel="noopener" className="founder__link">Read the full story {Icons.external}</a>
-            </div>
-          </Reveal>
-        </div>
-      </section>
+      <TeamSection alt />
 
       <section className="section">
         <div className="container">
@@ -1259,8 +1112,9 @@ input,textarea,select,button{font-family:inherit;font-size:inherit}
 
 /* ── Positioning ── */
 .positioning{display:grid;grid-template-columns:1.5fr 1fr;gap:48px;align-items:center}
-.positioning__main h2{font-size:clamp(1.8rem,3.2vw,2.4rem);margin-bottom:20px}
-.positioning__main p{color:var(--text-muted);line-height:1.8;font-size:1.05rem}
+.positioning__main h2,.positioning--solo h2{font-size:clamp(1.8rem,3.2vw,2.4rem);margin-bottom:20px}
+.positioning__main p,.positioning--solo p{color:var(--text-muted);line-height:1.8;font-size:1.05rem}
+.positioning--solo{display:block;max-width:860px}
 @media(max-width:860px){.positioning{grid-template-columns:1fr;gap:32px}}
 
 /* ── Placeholder boxes (testimonial / scheduler / stat) ── */
@@ -1395,6 +1249,18 @@ input,textarea,select,button{font-family:inherit;font-size:inherit}
 .founder__cta{display:flex;flex-wrap:wrap;gap:12px}
 @media(max-width:860px){.founder{grid-template-columns:1fr;gap:32px}.founder__photo{max-width:340px}}
 
+/* ── Veteran-Led Team ── */
+.team{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.team--single{grid-template-columns:minmax(0,720px);justify-content:center}
+.team-card{display:flex;gap:24px;align-items:flex-start;padding:28px;border-radius:var(--radius-lg);background:var(--surface);border:1px solid var(--border)}
+.team-card__photo{width:120px;height:120px;border-radius:var(--radius-lg);object-fit:cover;border:1px solid var(--border);flex-shrink:0}
+.team-card__photo--initial{display:flex;align-items:center;justify-content:center;background:var(--accent-glow);color:var(--accent);font-family:var(--font-display);font-weight:800;font-size:2.4rem}
+.team-card__name{font-size:1.2rem;color:var(--text);margin-bottom:2px}
+.team-card__role{font-family:var(--font-mono);font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+.team-card__blurb{color:var(--text-muted);line-height:1.65;font-size:0.95rem}
+@media(max-width:860px){.team{grid-template-columns:1fr}.team--single{grid-template-columns:1fr}}
+@media(max-width:520px){.team-card{flex-direction:column;gap:16px}.team-card__photo{width:96px;height:96px}}
+
 /* ── About split ── */
 .about-split{display:grid;grid-template-columns:0.8fr 1.2fr;gap:56px;align-items:start}
 .about-split__content h2{font-size:clamp(1.5rem,2.5vw,2rem);margin-bottom:18px}
@@ -1513,7 +1379,6 @@ export default function App({ initialPath }) {
     case "/services": Page = ServicesPage; break;
     case "/method": Page = MethodPage; break;
     case "/about": Page = AboutPage; break;
-    case "/work": Page = WorkPage; break;
     case "/contact": Page = ContactPage; break;
     default: Page = HomePage;
   }
