@@ -1,12 +1,12 @@
 import CommandApplicationsClient from "../_components/CommandApplicationsClient";
 
 export const metadata = {
-  title: "Services | AI Training & Workflow Automation (SDVOSB)",
+  title: "What We Install — The AI Operating System (SDVOSB)",
   description:
-    "AI training, workflow automation, AI advisory & implementation, and custom AI applications built by a veteran-led SDVOSB partner.",
+    "The four outcomes we install — Install, Acquire, Support, Scale — and the three AI Engine tiers (Core, Pro, Complete) we build and support for your business.",
+  alternates: { canonical: "/services" },
 };
 
 export default function ServicesPage() {
   return <CommandApplicationsClient initialPath="/services" />;
 }
-

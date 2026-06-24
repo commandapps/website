@@ -1,12 +1,12 @@
 import CommandApplicationsClient from "../_components/CommandApplicationsClient";
 
 export const metadata = {
-  title: "About | Veteran-Led SDVOSB AI Company",
+  title: "About — Built by an Operator, Run with Discipline (SDVOSB)",
   description:
-    "Learn why Command Applications is credible: veteran-led delivery, SDVOSB discipline, and a focus on turning AI into usable systems that save time and improve workflows.",
+    "Command Applications is veteran-led: West Point graduate (#2 in class), Marshall Scholar, Airborne Ranger and combat veteran, now building AI as a Chief Growth Officer. Why an SDVOSB is a better AI partner.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {
   return <CommandApplicationsClient initialPath="/about" />;
 }
-

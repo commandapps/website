@@ -1,12 +1,12 @@
 import CommandApplicationsClient from "../_components/CommandApplicationsClient";
 
 export const metadata = {
-  title: "Contact | Book a Consultation (Command Applications)",
+  title: "Book a Strategy Call — Find Where AI Fits Your Business",
   description:
-    "Book a consultation for AI training, workflow automation, AI advisory, and custom AI applications. Veteran-led SDVOSB partner focused on practical execution.",
+    "A 45-minute call — no pitch, no pressure. We'll map where AI and automation can make an immediate, measurable difference for your team.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {
   return <CommandApplicationsClient initialPath="/contact" />;
 }
-

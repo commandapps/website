@@ -3,11 +3,10 @@ import { Resend } from "resend";
 export const runtime = "nodejs";
 
 const INTEREST_LABELS = {
-  training: "AI Training",
-  automation: "Workflow Automation",
-  advisory: "AI Advisory & Implementation",
-  build: "Custom AI Application",
-  products: "Products / Courses",
+  audit: "AI Opportunity Audit",
+  core: "Core AI Engine",
+  pro: "Pro AI Engine",
+  complete: "Complete AI Engine",
   general: "General Inquiry",
 };
 
@@ -47,6 +46,7 @@ export async function POST(req) {
   const email = body?.email?.toString?.().trim?.() ?? "";
   const org = body?.org?.toString?.().trim?.() ?? "";
   const interest = body?.interest?.toString?.().trim?.() ?? "";
+  const source = body?.source?.toString?.().trim?.() ?? "";
   const message = body?.message?.toString?.().trim?.() ?? "";
 
   if (!name || !email || !message) {
@@ -78,8 +78,9 @@ export async function POST(req) {
         `Email: ${email}`,
         `Organization: ${org || "—"}`,
         `Interest: ${interestLabel}`,
+        `Lead source: ${source || "—"}`,
         ``,
-        `Message:`,
+        `Biggest manual workflow to remove:`,
         message,
       ].join("\n"),
       html: `
@@ -88,7 +89,8 @@ export async function POST(req) {
         <p><strong>Email:</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></p>
         <p><strong>Organization:</strong> ${escapeHtml(org || "—")}</p>
         <p><strong>Interest:</strong> ${escapeHtml(interestLabel)}</p>
-        <p><strong>Message:</strong></p>
+        <p><strong>Lead source:</strong> ${escapeHtml(source || "—")}</p>
+        <p><strong>Biggest manual workflow to remove:</strong></p>
         <p style="white-space:pre-wrap">${escapeHtml(message)}</p>
       `.trim(),
     });
