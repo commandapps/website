@@ -1,7 +1,15 @@
 'use client';
 
 import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { SITE, AIOS_DEFINITION, CREDENTIALS, TIERS, FAQ } from "../_data/site";
+
+// Cal.com embed is loaded only on /contact (and only client-side) so it never
+// weighs down the other routes' bundles.
+const CalEmbed = dynamic(() => import("./CalEmbed"), {
+  ssr: false,
+  loading: () => <div className="scheduler-embed__loading">Loading scheduler…</div>,
+});
 
 /* ─────────────────────────────────────────────
    COMMAND APPLICATIONS — "AI Operating System" agency site
@@ -11,10 +19,19 @@ import { SITE, AIOS_DEFINITION, CREDENTIALS, TIERS, FAQ } from "../_data/site";
 // Primary CTA used everywhere. Single, consistent conversion action (prompt §2).
 const PRIMARY_CTA = "Book a Strategy Call";
 
-// Booking: Cal.com embed URL (prompt §7). Set NEXT_PUBLIC_SCHEDULER_URL in env.
-// REPLACE: real Cal.com (or Calendly) booking URL.
+// Booking: Cal.com embed URL (prompt §7). Defaults to the live Cal.com link;
+// override per-environment with NEXT_PUBLIC_SCHEDULER_URL if needed.
+const DEFAULT_SCHEDULER_URL = "https://cal.com/commandapplications";
 const SCHEDULER_URL =
-  typeof process !== "undefined" ? process.env.NEXT_PUBLIC_SCHEDULER_URL || "" : "";
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_SCHEDULER_URL) ||
+  DEFAULT_SCHEDULER_URL;
+
+// Cal.com links use the official embed; anything else (e.g. Calendly) falls
+// back to a plain iframe.
+const CAL_LINK = (() => {
+  const m = /^https?:\/\/(?:www\.)?cal\.com\/(.+?)\/?$/.exec(SCHEDULER_URL || "");
+  return m ? m[1] : null;
+})();
 
 const HEADSHOT = "/assets/charlie-eadie-headshot.png";
 
@@ -1024,12 +1041,16 @@ function ContactPage() {
                 <p>Pick a time that works for you. Prefer to write first? Use the form and we&apos;ll reply within one business day.</p>
                 {SCHEDULER_URL ? (
                   <div className="scheduler-embed">
-                    <iframe
-                      src={SCHEDULER_URL}
-                      title="Book a strategy call"
-                      loading="lazy"
-                      className="scheduler-embed__frame"
-                    />
+                    {CAL_LINK ? (
+                      <CalEmbed calLink={CAL_LINK} />
+                    ) : (
+                      <iframe
+                        src={SCHEDULER_URL}
+                        title="Book a strategy call"
+                        loading="lazy"
+                        className="scheduler-embed__frame"
+                      />
+                    )}
                   </div>
                 ) : (
                   <div className="placeholder-box placeholder-box--scheduler">
@@ -1451,8 +1472,9 @@ input,textarea,select,button{font-family:inherit;font-size:inherit}
 .contact-info__item svg{color:var(--accent);flex-shrink:0}
 .contact-info__item strong{display:block;font-size:0.85rem;color:var(--text);margin-bottom:2px}
 .contact-info__item a{color:var(--accent);font-size:0.95rem}
-.scheduler-embed{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--surface)}
+.scheduler-embed{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--surface);min-height:640px}
 .scheduler-embed__frame{width:100%;height:640px;border:0;display:block}
+.scheduler-embed__loading{display:flex;align-items:center;justify-content:center;min-height:640px;color:var(--text-muted);font-size:0.95rem}
 .contact-form-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px}
 .contact-form-wrap h3{font-size:1.2rem;margin-bottom:24px}
 .contact-form{display:grid;grid-template-columns:1fr 1fr;gap:16px}
